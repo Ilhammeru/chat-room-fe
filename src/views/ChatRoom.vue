@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import Dialog from '@/components/Dialog.vue'
 import { useChatStore } from '@/stores/chat'
+import type { MessageList } from "@/types/messages.dto";
 import type { Contact } from '@/types/contact.dto'
 import { storeToRefs } from 'pinia'
-import { onMounted, ref, nextTick, watch, computed } from 'vue'
+import { onMounted, ref, nextTick, watch, computed, onUnmounted } from 'vue'
 import Account from './Account.vue'
 import ChooseAccount from './ChooseAccount.vue'
+import { Socket } from 'socket.io-client'
 
 const chatStore: ReturnType<typeof useChatStore> = useChatStore()
 
@@ -62,9 +64,14 @@ const selectAccount = (userId: number) => {
     chatStore.selectAccount(userId)
 }
 
+const initSocket = () => {
+    chatStore.initSocket()
+}
+
 onMounted(() => {
     scrollToBottom()
     getUsers()
+    initSocket()
 })
 </script>
 

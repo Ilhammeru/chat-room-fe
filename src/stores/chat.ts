@@ -32,12 +32,12 @@ export const useChatStore = defineStore('chat', () => {
 
     // Actions
     async function selectContact(contactId: number) {
-        // Reset socket
-        if (socket.value) socket.value.disconnect()
-
         selectedContactId.value = contactId
+
         // Initiate socket per user id
-        initSocket(contactId)
+        if (socket.value) {
+            socket.value.emit('register_user', selectedAccount.value?.id, selectedContactId.value);
+        }
 
         selectedUserInRoom.value = contacts.value.find(c => c.id === contactId) || null
 
@@ -48,14 +48,28 @@ export const useChatStore = defineStore('chat', () => {
 
     function selectAccount(accountId: number) {
         selectedAccount.value = contacts.value.find(c => c.id === accountId) || null
+        
+        if (socket.value) {
+            socket.value.emit('reset-user', selectedAccount.value?.id)
+        }
+    }
+
+    function setChatRoomName(senderId: number, targetId: number) {
+        const userIds = [senderId, targetId].sort((a, b) => a - b)
+        return `user-room:${userIds[0]}:${userIds[1]}`
     }
 
     function addMessage(message: MessageList) {
-        messages.value.push(message)
-
         if (socket.value) {
             // Send message to server
-            socket.value.emit('message-' + selectedContactId.value, message)
+            const senderId = selectedAccount.value?.id || 0
+            const targetId = selectedContactId.value || 0
+            socket.value.emit('send-message', {
+                message: message.text,
+                roomName: setChatRoomName(selectedAccount.value?.id || 0, selectedContactId.value || 0),
+                senderId,
+                targetId
+            })
         }
     }
 
@@ -73,26 +87,53 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
 
-    function initSocket(contactId?: number) {
-        if (! socket.value) {
-            socket.value = io('http://localhost:3500', {
+    function cleanupSocket() {
+        if (socket.value) {
+            socket.value.emit('reset-connection', selectedAccount.value?.id)
+            socket.value.disconnect()
+            socket.value = null
+        }
+    }
+
+    function initSocket() {
+        const promise = new Promise((resolve) => {
+            if (socket.value) {
+                cleanupSocket()
+            }
+
+            socket.value = io(import.meta.env.VITE_BASE_URL, {
                 withCredentials: true,
                 transports: ['websocket', 'polling']
             })
-
+    
             socket.value.on('connect', () => {
                 console.log('Connected to WebSocket server')
             })
-            
-            socket.value.on(`message-${contactId}`, (message: MessageList) => {
-                // addMessage(message)
-                console.log('Received message:', message)
-            })
 
+            socket.value.on('joined_room', (data) => {
+                console.log('joined room notification');
+            })
+        
+            socket.value.on('retrieve-message', (message) => {
+                // Format message
+                const formattedMessage: MessageList = {
+                    id: message.id,
+                    text: message.text,
+                    sender: message.senderId === selectedAccount.value?.id ? 'me' : 'other',
+                    timestamp: message.createdAt
+                }
+        
+                messages.value.push(formattedMessage)
+            })
+    
             socket.value.on('disconnect', () => {
                 console.log('Disconnected from WebSocket server')
             })
-        }
+
+            resolve(socket.value)
+        })
+
+        return promise
     }
 
     return {
@@ -101,6 +142,7 @@ export const useChatStore = defineStore('chat', () => {
         selectedContactId,
         messages,
         selectedUserInRoom,
+        socket,
 
         // Getters
         selectedContact,
@@ -114,6 +156,7 @@ export const useChatStore = defineStore('chat', () => {
         initSocket,
         getContacts,
         selectAccount,
-        availableContacts
+        availableContacts,
+        cleanupSocket
     }
 })
