@@ -1,6 +1,6 @@
 # chat-room
 
-This template should help get you started developing with Vue 3 in Vite.
+This is a simple chat application using websocket. Build using Vue JS 3
 
 ## Type Support for `.vue` Imports in TS
 
