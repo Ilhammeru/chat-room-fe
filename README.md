@@ -12,6 +12,13 @@ TypeScript cannot handle type information for `.vue` imports by default, so we r
 3. Open other browser window and select another account to chat with the first account. If both accounts are online or in the same chat room, you can see each other's message.
 4. **This application is already deployed on AWS. You can access it via [this chat room link](http://13.239.111.238).**
 
+## Answer of Basic Question
+1. Imagine you're building a website that allows users to submit photos. One of the requirements is that each photo must be reviewed by a moderator before it can be published. How would you design the logic for this process? What technologies would you use? Do you have any data structure in mind to support this based on your technology of choice to handle those data?
+    - I would design the login like this:
+        - when user submit photo, the photo will be stored in a temporary storage (like s3) and the photo information will be stored in database with status "pending"
+        - then moderator can access the pending photo list, and can approve or reject the photo. Then if the photo is approved, backend will change the status to "approved" and move the photo to the public storage, if the photo is rejected, backend will change the status to "rejected" and delete the photo from temporary storage
+    - For this process, i would use AWS S3 for storage
+
 ## Answer of the Vue JS question
 1. Explain Vue.js reactivity and common issues when tracking changes
    - Vue.js reactivity is a system or flow that allows application track all changes to data and automatically update the DOM or component when the data changes.
@@ -58,6 +65,9 @@ Rate of tools i used
     - S3 - 2/5, i have used it for storing static asset before
 6. Unit testing - 3/5, i use it for testing my code, but i still need to improve my skill in writing unit test
 7. Kanban boards - 5/5, i use it for project management and task tracking. Also in my current experience i build a kanban board for client
+
+# Answer for SQL
+Please check this [MD file](https://github.com/Ilhammeru/chat-room-fe/blob/main/answer.md) for that answer 
 
 ## Project Setup
 
