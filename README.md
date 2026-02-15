@@ -19,6 +19,9 @@ TypeScript cannot handle type information for `.vue` imports by default, so we r
         - then moderator can access the pending photo list, and can approve or reject the photo. Then if the photo is approved, backend will change the status to "approved" and move the photo to the public storage, if the photo is rejected, backend will change the status to "rejected" and delete the photo from temporary storage
     - For this process, i would use AWS S3 for storage
 
+## Answer of Javascript / Typescript code
+Please open this [File on Github](https://github.com/Ilhammeru/chat-room-be/blob/main/src/utils/helpers.ts) for the code answer
+
 ## Answer of the Vue JS question
 1. Explain Vue.js reactivity and common issues when tracking changes
    - Vue.js reactivity is a system or flow that allows application track all changes to data and automatically update the DOM or component when the data changes.
